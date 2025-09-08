@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "ms-python.black-formatter",
+    "ms-python.isort",
+    "ms-azuretools.vscode-docker",
+    "redhat.vscode-yaml",
+    "mikestead.dotenv",
+    "ms-ossdata.vscode-postgresql",
+    "humao.rest-client",
+    "42crunch.vscode-openapi",
+    "eamodio.gitlens",
+    "EditorConfig.EditorConfig",
+    "usernamehw.errorlens"
+  ]
+}
