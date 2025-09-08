@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+      - ./volumes/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports: ["6333:6333"]
+    volumes: ["./volumes/qdrant:/qdrant/storage"]
+    # healthcheck:
+    #   test: ["CMD", "wget", "--spider", "-q", "http://localhost:6333/"]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 30
+
+  loom-gateway:
+    build: { context: ./services/loom_gateway }
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      LOOM_CHAT_MODEL: ${LOOM_CHAT_MODEL}
+      LOOM_EMBED_MODEL: ${LOOM_EMBED_MODEL}
+      LOOM_BIND: ${LOOM_BIND}
+      LOOM_PORT: ${LOOM_PORT}
+      QDRANT_HOST: ${QDRANT_HOST}
+      QDRANT_PORT: ${QDRANT_PORT}
+      QDRANT_COLLECTION_PREFIX: ${QDRANT_COLLECTION_PREFIX}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TOP_K: ${TOP_K}
+      MIN_SCORE: ${MIN_SCORE}
+      DATA_DIR: ${DATA_DIR}
+      RAW_DIR: ${RAW_DIR}
+    volumes: ["./volumes/data:${DATA_DIR}"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      qdrant: { condition: service_started }
+    ports: ["8000:8000"]
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      CADDY_HTTP_PORT: ${CADDY_HTTP_PORT}
+    ports: ["${CADDY_HTTP_PORT}:8080"]
+    volumes: ["./services/caddy/Caddyfile:/etc/caddy/Caddyfile:ro"]
+    depends_on: ["loom-gateway"]

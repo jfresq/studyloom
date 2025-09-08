@@ -1,0 +1,9 @@
+fastapi>=0.111
+uvicorn[standard]>=0.30
+pydantic>=2.7
+qdrant-client>=1.9
+psycopg[binary]>=3.2
+openai>=1.51
+python-multipart>=0.0.9
+pypdf>=5.0.1
+tenacity>=8.2

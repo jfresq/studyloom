@@ -1,0 +1,9 @@
+:8080 {
+    encode gzip
+    route /v1/* {
+        reverse_proxy loom-gateway:8000
+    }
+    respond /healthz 200 {
+        body "ok"
+    }
+}
